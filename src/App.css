@@ -1,0 +1,52 @@
+*{
+  
+  margin: 0px;
+  padding: 0px;
+}
+
+.App-header{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.simon-wrapper{
+  display: flex;
+  width: 400px;
+  flex-wrap: wrap;
+}
+
+.simon-btn {
+  width: 200px;
+  height: 200px;
+  cursor: pointer;
+}
+
+.blue{
+  background-color: rgb(0, 0, 255);
+}
+.blue.flash{
+  background-color:rgb(125, 125, 255) ;
+}
+
+.green{
+  background-color: rgb(0, 128, 0);
+}
+.green.flash{
+  background-color: rgb(125, 255, 125);
+}
+
+.yellow{
+  background-color: rgb(255, 255, 0);
+}
+.yellow.flash{
+  background-color: rgb(255, 255, 125);
+}
+
+.red{
+  background-color: rgb(255, 0, 0);
+}
+.red.flash{
+  background-color: rgb(255, 125, 125);
+}
