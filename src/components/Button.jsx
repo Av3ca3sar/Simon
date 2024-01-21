@@ -7,9 +7,7 @@ export default function Button(props) {
         className={`simon-btn ${btnColor} ${flash}`} 
         onClick={props.flashButton} 
         key={props.index}
-        >
-            {btnColor}
-        </button>
+        ></button>
         
     )
 }

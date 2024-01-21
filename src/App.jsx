@@ -1,97 +1,106 @@
-import { useState } from 'react'
-import { useEffect } from 'react'
-import Button from './components/Button.jsx'
-import viteLogo from '/vite.svg'
-import './App.css'
-import timeOut from './utils/TimeOut.jsx'
+import { useState } from "react";
+import { useEffect } from "react";
+import Button from "./components/Button.jsx";
+import "./App.css";
+import timeOut from "./utils/TimeOut.jsx";
+import getRandomNumber from "./utils/GetRandomNumber.jsx";
 
 function App() {
+  const [player, setPlayer] = useState(false);
+  const [flashedColors, setFlashedColors] = useState([]);
+  const [playOn, setPlayOn] = useState(false);
+  const [colorButton, setColorButton] = useState([
+    "blue",
+    "green",
+    "yellow",
+    "red",
+  ]);
 
-  // const colorList= ["blue", "green", "yellow", "red"];
-  const [colorButton, setColorButton]= useState(["blue", "green", "yellow", "red"])
 
-  // useEffect(() => {
-  //   console.log("color en posicion 0 " + colorList[0])
-  // }
-  // ,[])
-  
-
-  //  // Example of using the delay utility function
-  //  async function example() {
-  //   console.log('Start of the code');
-  
-  //   // Introduce a delay of 2000 milliseconds (2 seconds)
-  //   await delay(2000);
-  
-  //   console.log('After 2 seconds');
-  
-  //   // Introduce another delay of 3000 milliseconds (3 seconds)
-  //   await delay(3000);
-  
-  //   console.log('After another 3 seconds');
-  // }
-  
-  // // Call the example function to see the delays in action
-  // example();
-  
-  
-  
-  async function flashButton(color,ind) {
-    const colorList=["blue", "green", "yellow", "red"]
-    const flashedColor=colorList[ind]+" flash"
-    colorList[ind]= flashedColor;
-    
-    setColorButton([...colorList])
-    await timeOut(1000)
-    colorList[ind]= color;
-    setColorButton([...colorList])
-    
+  async function flashButton(color, ind) {
+    if (playOn === true && player === true) {
+      const colorList = ["blue", "green", "yellow", "red"];
+      const newColor = colorButton[ind];
+      const coloresFlasheados=[...flashedColors]
+      setFlashedColors([...coloresFlasheados, newColor]);
+      const flashedColor = colorList[ind] + " flash";
+      colorList[ind] = flashedColor;
+      setColorButton([...colorList]);
+      await timeOut(300);
+      colorList[ind] = color;
+      setColorButton([...colorList]);
+      console.log("colores flasheados " + [flashedColors])
+    }
   }
-  // const diceElements = dice.map(die => (
-  //   <Die 
-  //       key={die.id} 
-  //       value={die.value} 
-  //       isHeld={die.isHeld} 
-  //       holdDice={() => holdDice(die.id)}
-  //   />
 
+  async function flashearButtons() {
+    console.log("lanzado " + flashedColors.length)
+    if (playOn === true) {
+      console.log("lanzado nuevo color " + flashedColors)
+      const number = getRandomNumber(3);
+      const newColor = colorButton[number];
+      console.log("este es el nuevo color " + newColor)
+      const coloresFlasheados=[...flashedColors]
+      console.log("colores flasheados  " + [coloresFlasheados])
+      setFlashedColors([...coloresFlasheados, newColor]);
+      console.log("este es el nuevo array " + flashedColors)
+      const colorList = ["blue", "green", "yellow", "red"];
+      let colorNumber;
+      for (const color of flashedColors) {
+        if (color === "blue") colorNumber = 0;
+        if (color === "green") colorNumber = 1;
+        if (color === "yellow") colorNumber = 2;
+        if (color === "red") colorNumber = 3;
+        const flashedColor = colorList[colorNumber] + " flash";
+        colorList[colorNumber] = flashedColor;
+        setColorButton([...colorList]);
+        await timeOut(700);
+        colorList[colorNumber] = color;
+        setColorButton([...colorList]);
+      }
+    }
+  }
 
-  const simonButtons = colorButton.map((color,index) => (
+  useEffect(() => {
+    console.log("lanzado useEffect, el player es " + player)
+    if (player===false) {
+      flashearButtons();
+      console.log("lanzado2")
+    }
+  }, [player]);
+
+  const SimonButtons = colorButton.map((color, index) => (
     <Button
       btnColor={color}
       key={index}
       index={index}
-      // key={color.id}
-      // flash="flash"
-      // key={die.id} 
-      // value={die.value} 
-      // isHeld={die.isHeld} 
-      flashButton={() => flashButton(color,index)}
+      flashButton={() => flashButton(color, index)}
     />
-  ))
+  ));
 
-
-  {/* {colorList.map((color,index) => {
-    return(
-      <Button 
-      btnColor={color} 
-      flash="flash"
-      key={index}
-      index={index}
-      onClick={() => handleClick(index)}
-      />)}
-      )
-  } */}
+  const ScoreDisplay = () => {
+    const handleStartClick = async () => {
+      if (flashedColors.length === 0) {
+        setPlayOn(true);
+        await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
+      }
+    };
+    
+    return (
+      <button className="start-button" onClick={handleStartClick}>
+        {playOn ? flashedColors.length : "Start"}
+      </button>
+    );
+  };
 
   return (
-    <div className='App'>
-      <div className='App-header'>
-        <div className='simon-wrapper'>
-          {simonButtons}
-        </div>
+    <div className="App">
+      <div className="App-header">
+        <div className="simon-wrapper">{SimonButtons}</div>
+        <ScoreDisplay />
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

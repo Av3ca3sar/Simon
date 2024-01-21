@@ -21,7 +21,9 @@
   width: 200px;
   height: 200px;
   cursor: pointer;
+  border: none;
 }
+
 
 .blue{
   background-color: rgb(0, 0, 255);
@@ -49,4 +51,13 @@
 }
 .red.flash{
   background-color: rgb(255, 125, 125);
+}
+
+.start-button{
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  border-radius: 90px;
+  cursor: pointer;
+  
 }
