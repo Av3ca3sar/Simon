@@ -21,7 +21,7 @@ function App() {
     if (playOn === true && player === true) {
       const colorList = ["blue", "green", "yellow", "red"];
       const newColor = colorButton[ind];
-      const coloresFlasheados=[...flashedColors]
+      const coloresFlasheados = [...flashedColors]
       setFlashedColors([...coloresFlasheados, newColor]);
       const flashedColor = colorList[ind] + " flash";
       colorList[ind] = flashedColor;
@@ -40,30 +40,36 @@ function App() {
       const number = getRandomNumber(3);
       const newColor = colorButton[number];
       console.log("este es el nuevo color " + newColor)
-      const coloresFlasheados=[...flashedColors]
+      const coloresFlasheados = [...flashedColors, newColor]
       console.log("colores flasheados  " + [coloresFlasheados])
-      setFlashedColors([...coloresFlasheados, newColor]);
-      console.log("este es el nuevo array " + flashedColors)
+
+
       const colorList = ["blue", "green", "yellow", "red"];
       let colorNumber;
-      for (const color of flashedColors) {
+      for (const color of coloresFlasheados) {
         if (color === "blue") colorNumber = 0;
         if (color === "green") colorNumber = 1;
         if (color === "yellow") colorNumber = 2;
         if (color === "red") colorNumber = 3;
         const flashedColor = colorList[colorNumber] + " flash";
         colorList[colorNumber] = flashedColor;
+        console.log("color a flashear..." + flashedColor)
         setColorButton([...colorList]);
         await timeOut(700);
         colorList[colorNumber] = color;
         setColorButton([...colorList]);
       }
+      console.log("colores Flasehados " + coloresFlasheados)
+      setFlashedColors([coloresFlasheados]);
+      console.log("este es el nuevo array al final flashedColors " + flashedColors)
+
+
     }
   }
 
   useEffect(() => {
     console.log("lanzado useEffect, el player es " + player)
-    if (player===false) {
+    if (player === false) {
       flashearButtons();
       console.log("lanzado2")
     }
@@ -80,12 +86,14 @@ function App() {
 
   const ScoreDisplay = () => {
     const handleStartClick = async () => {
-      if (flashedColors.length === 0) {
-        setPlayOn(true);
-        await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
-      }
+
+      setPlayOn(true);
+      await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
+      await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
+      await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
+
     };
-    
+
     return (
       <button className="start-button" onClick={handleStartClick}>
         {playOn ? flashedColors.length : "Start"}
@@ -96,7 +104,9 @@ function App() {
   return (
     <div className="App">
       <div className="App-header">
-        <div className="simon-wrapper">{SimonButtons}</div>
+        <div className="simon-wrapper">
+          {SimonButtons}
+        </div>
         <ScoreDisplay />
       </div>
     </div>
