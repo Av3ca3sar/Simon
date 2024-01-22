@@ -21,51 +21,76 @@ function App() {
     if (playOn === true && player === true) {
       const colorList = ["blue", "green", "yellow", "red"];
       const newColor = colorButton[ind];
-      const coloresFlasheados=[...flashedColors]
-      setFlashedColors([...coloresFlasheados, newColor]);
+      setFlashedColors([...flashedColors, newColor]);
       const flashedColor = colorList[ind] + " flash";
       colorList[ind] = flashedColor;
       setColorButton([...colorList]);
       await timeOut(300);
       colorList[ind] = color;
       setColorButton([...colorList]);
-      console.log("colores flasheados " + [flashedColors])
     }
   }
 
-  async function flashearButtons() {
-    console.log("lanzado " + flashedColors.length)
-    if (playOn === true) {
-      console.log("lanzado nuevo color " + flashedColors)
+
+  // async function flashearButtons() {
+  //   if (playOn === true) {
+  //     const number = getRandomNumber(3);
+  //     const newColor = colorButton[number];
+  //     const coloresFlasheados=[...flashedColors]
+  //     await setFlashedColors((prevColors) => [...prevColors, newColor]);
+  //     console.log("newColor dentro funcion " + newColor);
+  //     console.log("flashedColors dentro funcion " + flashedColors);
+  //     const colorList = ["blue", "green", "yellow", "red"];
+  //     let colorNumber;
+  //     for (const color of flashedColors) {
+  //       if (color === "blue") colorNumber = 0;
+  //       if (color === "green") colorNumber = 1;
+  //       if (color === "yellow") colorNumber = 2;
+  //       if (color === "red") colorNumber = 3;
+  //       const flashedColor = colorList[colorNumber] + " flash";
+  //       colorList[colorNumber] = flashedColor;
+  //       setColorButton([...colorList]);
+  //       await timeOut(700);
+  //       colorList[colorNumber] = color;
+  //       setColorButton([...colorList]);
+  //     }
+  //   }
+  // }
+
+  const flashearButtons = () => {
+    if (playOn) {
       const number = getRandomNumber(3);
       const newColor = colorButton[number];
-      console.log("este es el nuevo color " + newColor)
-      const coloresFlasheados=[...flashedColors]
-      console.log("colores flasheados  " + [coloresFlasheados])
-      setFlashedColors([...coloresFlasheados, newColor]);
-      console.log("este es el nuevo array " + flashedColors)
-      const colorList = ["blue", "green", "yellow", "red"];
-      let colorNumber;
-      for (const color of flashedColors) {
-        if (color === "blue") colorNumber = 0;
-        if (color === "green") colorNumber = 1;
-        if (color === "yellow") colorNumber = 2;
-        if (color === "red") colorNumber = 3;
-        const flashedColor = colorList[colorNumber] + " flash";
-        colorList[colorNumber] = flashedColor;
-        setColorButton([...colorList]);
-        await timeOut(700);
-        colorList[colorNumber] = color;
-        setColorButton([...colorList]);
-      }
+  
+      setFlashedColors(prevColors => {
+        const updatedColors = [...prevColors, newColor];
+        setTimeout(() => {
+          setFlashedColors(updatedColors.slice(0, -1));
+        }, 700);
+  
+        return updatedColors;
+      });
+  
+      setTimeout(() => {
+        if (playOn) {
+          flashearButtons(); // Continue the sequence
+        }
+      }, 1400);
     }
-  }
+  };
+  
+  
+  
+
+
 
   useEffect(() => {
-    console.log("lanzado useEffect, el player es " + player)
-    if (player===false) {
+    console.log("flashedColors", flashedColors);
+  }, [flashedColors]);
+
+  useEffect(() => {
+    if (player === false) {
       flashearButtons();
-      console.log("lanzado2")
     }
   }, [player]);
 
@@ -82,10 +107,10 @@ function App() {
     const handleStartClick = async () => {
       if (flashedColors.length === 0) {
         setPlayOn(true);
-        await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
+        await flashearButtons();
       }
     };
-    
+
     return (
       <button className="start-button" onClick={handleStartClick}>
         {playOn ? flashedColors.length : "Start"}
