@@ -79,6 +79,7 @@ function App() {
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [flashSpeed, setFlashSpeed] = useState(800); // Initial speed for flashing
   const [colorButtons, setColorButtons] = useState([
     "blue",
     "green",
@@ -101,15 +102,23 @@ function App() {
 
     setIsGameOver(false);
     setIsGameRunning(true);
+    setIsPlayerTurn(false); // Reset player turn state
     setScore(0);
     setSequence([]);
     setPlayerSequence([]);
-    setTimeout(() => addNewColorToSequence(), 100);
+    setFlashSpeed(800); // Reset speed on new game
+    setColorButtons(["blue", "green", "yellow", "red"]); // Ensure buttons are reset
+    setTimeout(() => addNewColorToSequence(), 1000); // Increased delay
   };
 
   const addNewColorToSequence = () => {
     const newColor = colorButtons[getRandomNumber(3)];
-    setSequence((prevSequence) => [...prevSequence, newColor]);
+    setSequence((prevSequence) => {
+      const updatedSequence = [...prevSequence, newColor];
+      // Decrease flash speed as sequence length increases, but not below a minimum
+      setFlashSpeed(prevSpeed => Math.max(150, prevSpeed - 60)); // Adjust speed decrement as needed
+      return updatedSequence;
+    });
   };
 
   const flashPlayerButton = async (color) => {
@@ -156,14 +165,16 @@ function App() {
   const flashColors = async () => {
     setIsPlayerTurn(false);
     for (let i = 0; i < sequence.length; i++) {
-      await timeOut(300);
-      const color = sequence[i];
-      playSound(color);
-      const originalColors = [...colorButtons];
-      const colorIndex = originalColors.indexOf(color);
-      originalColors[colorIndex] = color + " flash";
-      setColorButtons(originalColors);
-      await timeOut(500);
+      await timeOut(flashSpeed / 2); // Delay before flashing, half of flashSpeed
+      const colorToFlash = sequence[i];
+      playSound(colorToFlash);
+
+      // Apply flash class
+      setColorButtons(prevColors => prevColors.map(c => c === colorToFlash ? c + " flash" : c));
+
+      await timeOut(flashSpeed); // Duration of flash
+
+      // Remove flash class
       setColorButtons(["blue", "green", "yellow", "red"]);
     }
     setIsPlayerTurn(true);
