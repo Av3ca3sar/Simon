@@ -1,113 +1,213 @@
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Button from "./components/Button.jsx";
 import "./App.css";
 import timeOut from "./utils/TimeOut.jsx";
 import getRandomNumber from "./utils/GetRandomNumber.jsx";
 
+// --- Sound Generation ---
+let audioContext = null;
+
+const playSound = (color) => {
+  if (!audioContext) return;
+
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  const frequencies = {
+    blue: 261.63, // C4
+    green: 329.63, // E4
+    yellow: 392.00, // G4
+    red: 523.25, // C5
+  };
+
+  oscillator.type = 'triangle';
+  oscillator.frequency.setValueAtTime(frequencies[color] || 440, audioContext.currentTime);
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.4);
+};
+
+const playErrorSound = () => {
+  if (!audioContext) return;
+
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.type = 'sawtooth';
+  oscillator.frequency.setValueAtTime(98, audioContext.currentTime); // Lower pitch (G2)
+  
+  gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.2); // Longer duration
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 1.2); // Longer duration
+};
+
+const playStartSound = () => {
+  if (!audioContext) return;
+
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime); // G5
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.2);
+};
+
+
 function App() {
-  const [player, setPlayer] = useState(false);
-  const [flashedColors, setFlashedColors] = useState([]);
-  const [playOn, setPlayOn] = useState(false);
-  const [colorButton, setColorButton] = useState([
+  const [sequence, setSequence] = useState([]);
+  const [playerSequence, setPlayerSequence] = useState([]);
+  const [isPlayerTurn, setIsPlayerTurn] = useState(false);
+  const [isGameRunning, setIsGameRunning] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [score, setScore] = useState(0);
+  const [colorButtons, setColorButtons] = useState([
     "blue",
     "green",
     "yellow",
     "red",
   ]);
 
+  const handleStart = () => {
+    if (isGameRunning && isPlayerTurn) return;
+    
+    if (!audioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.error("Web Audio API is not supported in this browser");
+        }
+    }
+    
+    playStartSound();
 
-  async function flashButton(color, ind) {
-    if (playOn === true && player === true) {
-      const colorList = ["blue", "green", "yellow", "red"];
-      const newColor = colorButton[ind];
-      const coloresFlasheados = [...flashedColors]
-      setFlashedColors([...coloresFlasheados, newColor]);
-      const flashedColor = colorList[ind] + " flash";
-      colorList[ind] = flashedColor;
-      setColorButton([...colorList]);
+    setIsGameOver(false);
+    setIsGameRunning(true);
+    setScore(0);
+    setSequence([]);
+    setPlayerSequence([]);
+    setTimeout(() => addNewColorToSequence(), 100);
+  };
+
+  const addNewColorToSequence = () => {
+    const newColor = colorButtons[getRandomNumber(3)];
+    setSequence((prevSequence) => [...prevSequence, newColor]);
+  };
+
+  const flashPlayerButton = async (color) => {
+    playSound(color);
+    const originalColors = [...colorButtons];
+    const colorIndex = originalColors.indexOf(color);
+    if (colorIndex === -1) return;
+
+    originalColors[colorIndex] = color + " flash";
+    setColorButtons(originalColors);
+    await timeOut(300);
+    setColorButtons(["blue", "green", "yellow", "red"]);
+  };
+
+  const handlePlayerInput = async (color) => {
+    if (!isPlayerTurn || isGameOver) return;
+
+    const newPlayerSequence = [...playerSequence, color];
+    
+    if (newPlayerSequence[newPlayerSequence.length - 1] !== sequence[newPlayerSequence.length - 1]) {
+      playErrorSound();
+      await flashPlayerButton(color);
+      setPlayerSequence([]);
+      setIsGameOver(true);
+      setIsGameRunning(false);
+      setTimeout(() => {
+        setIsGameOver(false);
+      }, 2000);
+      return;
+    }
+    
+    await flashPlayerButton(color);
+    setPlayerSequence(newPlayerSequence);
+
+    if (newPlayerSequence.length === sequence.length) {
+      setScore(score + 1);
+      setIsPlayerTurn(false);
+      setPlayerSequence([]);
+      await timeOut(1000);
+      addNewColorToSequence();
+    }
+  };
+
+  const flashColors = async () => {
+    setIsPlayerTurn(false);
+    for (let i = 0; i < sequence.length; i++) {
       await timeOut(300);
-      colorList[ind] = color;
-      setColorButton([...colorList]);
-      console.log("colores flasheados " + [flashedColors])
+      const color = sequence[i];
+      playSound(color);
+      const originalColors = [...colorButtons];
+      const colorIndex = originalColors.indexOf(color);
+      originalColors[colorIndex] = color + " flash";
+      setColorButtons(originalColors);
+      await timeOut(500);
+      setColorButtons(["blue", "green", "yellow", "red"]);
     }
-  }
-
-  async function flashearButtons() {
-    console.log("lanzado " + flashedColors.length)
-    if (playOn === true) {
-      console.log("lanzado nuevo color " + flashedColors)
-      const number = getRandomNumber(3);
-      const newColor = colorButton[number];
-      console.log("este es el nuevo color " + newColor)
-      const coloresFlasheados = [...flashedColors, newColor]
-      console.log("colores flasheados  " + [coloresFlasheados])
-
-
-      const colorList = ["blue", "green", "yellow", "red"];
-      let colorNumber;
-      for (const color of coloresFlasheados) {
-        if (color === "blue") colorNumber = 0;
-        if (color === "green") colorNumber = 1;
-        if (color === "yellow") colorNumber = 2;
-        if (color === "red") colorNumber = 3;
-        const flashedColor = colorList[colorNumber] + " flash";
-        colorList[colorNumber] = flashedColor;
-        console.log("color a flashear..." + flashedColor)
-        setColorButton([...colorList]);
-        await timeOut(700);
-        colorList[colorNumber] = color;
-        setColorButton([...colorList]);
-      }
-      console.log("colores Flasehados " + coloresFlasheados)
-      setFlashedColors([coloresFlasheados]);
-      console.log("este es el nuevo array al final flashedColors " + flashedColors)
-
-
-    }
-  }
+    setIsPlayerTurn(true);
+  };
 
   useEffect(() => {
-    console.log("lanzado useEffect, el player es " + player)
-    if (player === false) {
-      flashearButtons();
-      console.log("lanzado2")
+    if (isGameRunning && !isPlayerTurn && sequence.length > 0) {
+      flashColors();
     }
-  }, [player]);
+  }, [sequence, isGameRunning]);
 
-  const SimonButtons = colorButton.map((color, index) => (
+
+  const SimonButtons = colorButtons.map((color, index) => (
     <Button
       btnColor={color}
       key={index}
-      index={index}
-      flashButton={() => flashButton(color, index)}
+      flashButton={() => handlePlayerInput(color)}
     />
   ));
-
-  const ScoreDisplay = () => {
-    const handleStartClick = async () => {
-
-      setPlayOn(true);
-      await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
-      await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
-      await flashearButtons(); // Ensure that flashearButtons is awaited before checking length
-
-    };
-
-    return (
-      <button className="start-button" onClick={handleStartClick}>
-        {playOn ? flashedColors.length : "Start"}
-      </button>
-    );
-  };
 
   return (
     <div className="App">
       <div className="App-header">
-        <div className="simon-wrapper">
-          {SimonButtons}
+        <div className="simon-wrapper">{SimonButtons}</div>
+        <div className="game-controls">
+          <button className="start-button" onClick={handleStart}>
+            <div className="score">
+              <div className="lcd-line">
+                <span className="lcd-label">
+                  {isGameOver ? "SYSTEM" : isGameRunning ? "SCORE" : "SIMON"}
+                </span>
+              </div>
+              <div className="lcd-line">
+                {isGameOver ? (
+                  <span className="lcd-main-text failed">FAILED</span>
+                ) : isGameRunning ? (
+                  <span className="lcd-main-text score-digits">{String(score).padStart(3, '0')}</span>
+                ) : (
+                  <span className="lcd-main-text">START</span>
+                )}
+              </div>
+            </div>
+          </button>
         </div>
-        <ScoreDisplay />
       </div>
     </div>
   );

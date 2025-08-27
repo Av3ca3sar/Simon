@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
 *{
-  
   margin: 0px;
   padding: 0px;
+  box-sizing: border-box;
 }
 
 .App-header{
@@ -9,55 +11,156 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
+  position: relative;
+  background: radial-gradient(circle, rgba(80,80,80,1) 0%, rgba(20,20,20,1) 100%);
 }
 
 .simon-wrapper{
   display: flex;
-  width: 400px;
+  width: 540px;
+  height: 540px;
   flex-wrap: wrap;
+  border-radius: 50%;
+  position: absolute;
+  background-color: #2c2c2c;
+  box-shadow: 
+    inset 0 0 20px rgba(0,0,0,0.6),
+    0 10px 20px rgba(0,0,0,0.5);
+  padding: 10px; /* Further reduced padding */
 }
 
 .simon-btn {
-  width: 200px;
-  height: 200px;
+  width: 50%;
+  height: 50%;
   cursor: pointer;
-  border: none;
+  transition: all 0.1s ease-in-out;
+  border: 2px solid #2c2c2c; /* Reverted border */
+  background-clip: padding-box;
+  box-shadow: inset 0 5px 15px rgba(0,0,0,0.4); /* Inset shadow for depth */
 }
 
+.simon-btn:active {
+    transform: scale(0.98);
+}
 
 .blue{
-  background-color: rgb(0, 0, 255);
+  background: radial-gradient(circle at 100% 100%, #00a, #00f);
+  border-top-left-radius: 100%;
 }
 .blue.flash{
-  background-color:rgb(125, 125, 255) ;
+  background: #66f;
+  box-shadow: inset 0 0 20px #fff, 0 0 30px #00f;
 }
 
 .green{
-  background-color: rgb(0, 128, 0);
+  background: radial-gradient(circle at 0% 100%, #0a0, #0f0);
+  border-top-right-radius: 100%;
 }
 .green.flash{
-  background-color: rgb(125, 255, 125);
+  background: #6f6;
+  box-shadow: inset 0 0 20px #fff, 0 0 30px #0f0;
 }
 
 .yellow{
-  background-color: rgb(255, 255, 0);
+  background: radial-gradient(circle at 100% 0%, #aa0, #ff0);
+  border-bottom-left-radius: 100%;
 }
 .yellow.flash{
-  background-color: rgb(255, 255, 125);
+  background: #ff6;
+  box-shadow: inset 0 0 20px #fff, 0 0 30px #ff0;
 }
 
 .red{
-  background-color: rgb(255, 0, 0);
+  background: radial-gradient(circle at 0% 0%, #a00, #f00);
+  border-bottom-right-radius: 100%;
 }
 .red.flash{
-  background-color: rgb(255, 125, 125);
+  background: #f66;
+  box-shadow: inset 0 0 20px #fff, 0 0 30px #f00;
+}
+
+.game-controls {
+    position: absolute;
+    width: 258px; /* Adjusted size for consistent gap */
+    height: 258px; /* Adjusted size for consistent gap */
+    border-radius: 50%;
+    background-color: #2c2c2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
 }
 
 .start-button{
-  position: absolute;
-  height: 100px;
-  width: 100px;
-  border-radius: 90px;
+  height: 250px; /* Reverted size */
+  width: 250px; /* Reverted size */
+  border-radius: 50%;
   cursor: pointer;
-  
+  background: radial-gradient(#e0e0e0, #c0c0c0);
+  border: 1px solid #999;
+  box-shadow: 
+    inset 0 3px 5px rgba(255,255,255,0.5),
+    inset 0 -10px 20px rgba(0,0,0,0.3),
+    0 5px 10px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease-in-out;
+}
+
+.start-button:active {
+    transform: translateY(2px);
+    box-shadow: 
+        inset 0 2px 5px rgba(255,255,255,0.5),
+        inset 0 -5px 15px rgba(0,0,0,0.3),
+        0 2px 5px rgba(0,0,0,0.5),
+        0 0 25px 15px #fff;
+}
+
+.score {
+    background-color: #1a2a1a;
+    color: #3f3;
+    padding: 10px;
+    border-radius: 3px;
+    border: 3px solid #333;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.7);
+    width: 65%; /* Further reduced size */
+    height: 40%; /* Further reduced size */
+    font-family: 'Orbitron', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.lcd-line {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lcd-label {
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    color: #5f5;
+    text-shadow: 0 0 5px #5f5;
+    text-align: left;
+    width: 100%;
+}
+
+.lcd-main-text {
+    font-size: 1.6rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.score-digits {
+    font-size: 2.2rem;
+    letter-spacing: 4px;
+}
+
+.lcd-main-text.failed {
+    color: #f00;
+    text-shadow: 0 0 10px #f00;
 }
