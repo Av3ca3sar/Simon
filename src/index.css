@@ -1,4 +1,10 @@
-*{
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Prevent scrolling if content overflows */
+}
+
+* {
   background-color: #353535;
   color: white;
 }
