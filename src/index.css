@@ -4,7 +4,7 @@ html, body {
   overflow: hidden; /* Prevent scrolling if content overflows */
 }
 
-* {
+body {
   background-color: #353535;
   color: white;
 }
