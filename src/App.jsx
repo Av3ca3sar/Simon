@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Button from "./components/Button.jsx";
+import GameOverModal from "./components/GameOverModal.jsx";
 import "./App.css";
 import timeOut from "./utils/TimeOut.jsx";
 import getRandomNumber from "./utils/GetRandomNumber.jsx";
@@ -94,7 +95,7 @@ function App() {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         } catch (e) {
-            console.error("Web Audio API is not supported in this browser");
+            console.error("La API de Web Audio no es compatible con este navegador");
         }
     }
     
@@ -144,9 +145,6 @@ function App() {
       setPlayerSequence([]);
       setIsGameOver(true);
       setIsGameRunning(false);
-      setTimeout(() => {
-        setIsGameOver(false);
-      }, 2000);
       return;
     }
     
@@ -180,6 +178,16 @@ function App() {
     setIsPlayerTurn(true);
   };
 
+  const handleSaveScore = async (name, score) => {
+    const soundSequence = ["yellow", "green", "red"];
+    for (const color of soundSequence) {
+      playSound(color);
+      await timeOut(400);
+    }
+    console.log("Guardando puntuación:", { name, score });
+    setIsGameOver(false); // Close the modal
+  };
+
   useEffect(() => {
     if (isGameRunning && !isPlayerTurn && sequence.length > 0) {
       flashColors();
@@ -197,6 +205,7 @@ function App() {
 
   return (
     <div className="App">
+      {isGameOver && <GameOverModal score={score} onSave={handleSaveScore} onRetry={handleStart} />}
       <div className="App-header">
         <div className="simon-wrapper">{SimonButtons}</div>
         <div className="game-controls">
@@ -204,16 +213,14 @@ function App() {
             <div className="score">
               <div className="lcd-line">
                 <span className="lcd-label">
-                  {isGameOver ? "SYSTEM" : isGameRunning ? "SCORE" : "SIMON"}
+                  {isGameRunning ? "PUNTOS" : "SIMON"}
                 </span>
               </div>
               <div className="lcd-line">
-                {isGameOver ? (
-                  <span className="lcd-main-text failed">FAILED</span>
-                ) : isGameRunning ? (
+                {isGameRunning ? (
                   <span className="lcd-main-text score-digits">{String(score).padStart(3, '0')}</span>
                 ) : (
-                  <span className="lcd-main-text">START</span>
+                  <span className="lcd-main-text">INICIAR</span>
                 )}
               </div>
             </div>
