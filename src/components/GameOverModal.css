@@ -4,26 +4,49 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  font-family: 'Orbitron', sans-serif;
 }
 
 .modal-content {
-  background: white;
-  padding: 20px;
+  background-color: #1a2a1a; /* LCD background */
+  color: #5f5; /* LCD text color */
+  border: 3px solid #333;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.7);
+  padding: 25px;
   border-radius: 5px;
   text-align: center;
-  color: black;
+  text-shadow: 0 0 5px #5f5; /* LCD text shadow */
+}
+
+.modal-content h2 {
+    color: #5f5;
+    text-shadow: inherit; /* Inherit from parent */
+    font-size: 2rem;
+}
+
+.modal-content p {
+    margin-top: 10px;
+    font-size: 1.2rem;
 }
 
 .modal-content input {
   display: block;
-  margin: 10px auto;
-  padding: 8px;
-  width: 80%;
+  margin: 20px auto;
+  padding: 10px;
+  width: 90%;
+  background-color: #111;
+  border: 2px solid #333;
+  border-radius: 3px;
+  color: #5f5;
+  font-family: inherit;
+  text-align: center;
+  font-size: 1.1rem;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
 }
 
 .modal-buttons {
@@ -35,9 +58,17 @@
 
 .modal-content button {
   padding: 10px 20px;
-  border: none;
-  background-color: #4CAF50;
-  color: white;
+  border: 2px solid #333;
+  background-color: #111;
+  color: #5f5;
   border-radius: 5px;
   cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  text-shadow: inherit;
+}
+
+.modal-content button:hover {
+    background-color: #222;
+    box-shadow: 0 0 10px rgba(95, 255, 95, 0.5);
 }

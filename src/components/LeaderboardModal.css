@@ -1,0 +1,31 @@
+/* Using the same overlay and content base as GameOverModal */
+@import url("./GameOverModal.css");
+
+/* Leaderboard Specific Styles */
+.leaderboard-modal ol {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    width: 250px;
+    text-align: left;
+}
+
+.leaderboard-modal li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 5px;
+    border-bottom: 1px dashed #3f3; /* Use a variant of the green */
+    font-size: 1.1rem;
+}
+
+.leaderboard-modal li:last-child {
+    border-bottom: none;
+}
+
+.leaderboard-modal li span:last-child {
+    font-weight: bold;
+}
+
+.leaderboard-modal button {
+    margin-top: 10px;
+}

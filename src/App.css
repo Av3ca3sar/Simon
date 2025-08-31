@@ -127,9 +127,7 @@
   border: 3px solid #333;
   box-shadow: inset 0 0 8px rgba(0,0,0,0.7);
   width: 80%;
-  height: 30%;
-  min-width: 70px;   /* Prevents too small on tiny screens */
-  min-height: 25px;
+  height: 40%; /* Increased height slightly */
   font-family: 'Orbitron', sans-serif;
   position: absolute;
   top: 50%;
@@ -137,7 +135,7 @@
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around; /* Better spacing */
   padding: 5px;
 }
 
@@ -148,19 +146,22 @@
   align-items: center;
 }
 
-.lcd-label {
-  /* make it the same size as .score-digits */
-  font-size: clamp(1.4rem, 4vw, 2.2rem);
-  letter-spacing: 4px;
-  color: #5f5;
-  text-shadow: 0 0 5px #5f5;
-  text-align: center; /* center text like digits */
-  width: 100%;
+.lcd-text {
+    color: #5f5;
+    text-shadow: 0 0 5px #5f5;
+    text-align: center;
+    width: 100%;
+    line-height: 1.1; /* Adjust line height */
 }
 
-.score-digits {
-  font-size: clamp(0.8rem, 4vw, 0.8rem);
-  letter-spacing: 4px;
+.lcd-label {
+  font-size: clamp(0.5rem, 4.5vw, 1.5rem); /* Top line, bigger */
+  letter-spacing: 1px;
+}
+
+.lcd-main-text {
+    font-size: clamp(0.4rem, 3.5vw, 1.1rem); /* Bottom line, smaller */
+    letter-spacing: 1px;
 }
 
 .failed {

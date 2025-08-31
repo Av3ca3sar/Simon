@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import Button from "./components/Button.jsx";
 import GameOverModal from "./components/GameOverModal.jsx";
+import LeaderboardModal from "./components/LeaderboardModal.jsx";
+import { db } from "./firebase.js";
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from "firebase/firestore"; 
 import "./App.css";
 import timeOut from "./utils/TimeOut.jsx";
 import getRandomNumber from "./utils/GetRandomNumber.jsx";
@@ -79,6 +82,8 @@ function App() {
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState([]);
   const [score, setScore] = useState(0);
   const [flashSpeed, setFlashSpeed] = useState(800); // Initial speed for flashing
   const [colorButtons, setColorButtons] = useState([
@@ -102,6 +107,7 @@ function App() {
     playStartSound();
 
     setIsGameOver(false);
+    setShowLeaderboard(false);
     setIsGameRunning(true);
     setIsPlayerTurn(false); // Reset player turn state
     setScore(0);
@@ -110,6 +116,14 @@ function App() {
     setFlashSpeed(800); // Reset speed on new game
     setColorButtons(["blue", "green", "yellow", "red"]); // Ensure buttons are reset
     setTimeout(() => addNewColorToSequence(), 1000); // Increased delay
+  };
+
+  const handleRetry = () => {
+    setIsGameOver(false);
+  };
+
+  const handleCloseLeaderboard = () => {
+    setShowLeaderboard(false);
   };
 
   const addNewColorToSequence = () => {
@@ -184,8 +198,26 @@ function App() {
       playSound(color);
       await timeOut(400);
     }
-    console.log("Guardando puntuación:", { name, score });
-    setIsGameOver(false); // Close the modal
+    
+    setIsGameOver(false); // Close the first modal
+
+    try {
+      await addDoc(collection(db, "scores"), {
+        name: name,
+        score: score,
+        createdAt: serverTimestamp()
+      });
+      
+      // Fetch top 5 scores
+      const scoresQuery = query(collection(db, "scores"), orderBy("score", "desc"), limit(5));
+      const querySnapshot = await getDocs(scoresQuery);
+      const topScores = querySnapshot.docs.map(doc => doc.data());
+      setLeaderboardData(topScores);
+      setShowLeaderboard(true); // Show the leaderboard modal
+
+    } catch (error) {
+      console.error("Error al guardar o leer la puntuación: ", error);
+    }
   };
 
   useEffect(() => {
@@ -205,22 +237,23 @@ function App() {
 
   return (
     <div className="App">
-      {isGameOver && <GameOverModal score={score} onSave={handleSaveScore} onRetry={handleStart} />}
+      {isGameOver && <GameOverModal score={score} onSave={handleSaveScore} onRetry={handleRetry} />}
+      {showLeaderboard && <LeaderboardModal scores={leaderboardData} onClose={handleCloseLeaderboard} />}
       <div className="App-header">
         <div className="simon-wrapper">{SimonButtons}</div>
         <div className="game-controls">
           <button className="start-button" onClick={handleStart}>
             <div className="score">
               <div className="lcd-line">
-                <span className="lcd-label">
+                <span className="lcd-label lcd-text">
                   {isGameRunning ? "PUNTOS" : "SIMON"}
                 </span>
               </div>
               <div className="lcd-line">
                 {isGameRunning ? (
-                  <span className="lcd-main-text score-digits">{String(score).padStart(3, '0')}</span>
+                  <span className="lcd-main-text lcd-text score-digits">{String(score).padStart(3, '0')}</span>
                 ) : (
-                  <span className="lcd-main-text">INICIAR</span>
+                  <span className="lcd-main-text lcd-text">INICIAR</span>
                 )}
               </div>
             </div>
