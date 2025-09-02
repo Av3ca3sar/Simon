@@ -208,10 +208,23 @@ function App() {
         createdAt: serverTimestamp()
       });
       
-      // Fetch top 5 scores
-      const scoresQuery = query(collection(db, "scores"), orderBy("score", "desc"), limit(5));
+      // Fetch scores
+      const scoresQuery = query(collection(db, "scores"), orderBy("score", "desc"), limit(100));
       const querySnapshot = await getDocs(scoresQuery);
-      const topScores = querySnapshot.docs.map(doc => doc.data());
+      const allScores = querySnapshot.docs.map(doc => doc.data());
+
+      // Process scores to get unique top scores
+      const uniqueScores = {};
+      allScores.forEach(score => {
+        if (!uniqueScores[score.name] || score.score > uniqueScores[score.name].score) {
+          uniqueScores[score.name] = score;
+        }
+      });
+
+      const topScores = Object.values(uniqueScores)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+
       setLeaderboardData(topScores);
       setShowLeaderboard(true); // Show the leaderboard modal
 
