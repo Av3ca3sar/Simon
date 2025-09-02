@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Button from "./components/Button.jsx";
 import GameOverModal from "./components/GameOverModal.jsx";
 import LeaderboardModal from "./components/LeaderboardModal.jsx";
@@ -93,6 +93,9 @@ function App() {
     "red",
   ]);
 
+  const pressTimer = useRef();
+  const isLongPress = useRef(false);
+
   const handleStart = () => {
     if (isGameRunning && isPlayerTurn) return;
     
@@ -124,6 +127,63 @@ function App() {
 
   const handleCloseLeaderboard = () => {
     setShowLeaderboard(false);
+  };
+
+  const fetchAndShowLeaderboard = async () => {
+    try {
+      // Fetch scores
+      const scoresQuery = query(collection(db, "scores"), orderBy("score", "desc"), limit(100));
+      const querySnapshot = await getDocs(scoresQuery);
+      const allScores = querySnapshot.docs.map(doc => doc.data());
+
+      // Process scores to get unique top scores
+      const uniqueScores = {};
+      allScores.forEach(score => {
+        if (!uniqueScores[score.name] || score.score > uniqueScores[score.name].score) {
+          uniqueScores[score.name] = score;
+        }
+      });
+
+      const topScores = Object.values(uniqueScores)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+
+      setLeaderboardData(topScores);
+      setShowLeaderboard(true); // Show the leaderboard modal
+
+    } catch (error) {
+      console.error("Error al leer la puntuación: ", error);
+    }
+  }
+
+  const handleShowLeaderboard = () => {
+    if (isGameRunning) return;
+    fetchAndShowLeaderboard();
+  }
+
+  const handleMouseDownOnStart = () => {
+    if (isGameRunning) return;
+    isLongPress.current = false;
+    pressTimer.current = setTimeout(() => {
+        isLongPress.current = true;
+        handleShowLeaderboard();
+    }, 700); // 700ms for long press
+  };
+
+  const handleMouseUpOnStart = () => {
+      if (isGameRunning) {
+        // if game is running, button has no action on release
+        return;
+      }
+      clearTimeout(pressTimer.current);
+      if (!isLongPress.current) {
+          handleStart();
+      }
+  };
+
+  const handleMouseLeaveOnStart = () => {
+      if (isGameRunning) return;
+      clearTimeout(pressTimer.current);
   };
 
   const addNewColorToSequence = () => {
@@ -208,25 +268,7 @@ function App() {
         createdAt: serverTimestamp()
       });
       
-      // Fetch scores
-      const scoresQuery = query(collection(db, "scores"), orderBy("score", "desc"), limit(100));
-      const querySnapshot = await getDocs(scoresQuery);
-      const allScores = querySnapshot.docs.map(doc => doc.data());
-
-      // Process scores to get unique top scores
-      const uniqueScores = {};
-      allScores.forEach(score => {
-        if (!uniqueScores[score.name] || score.score > uniqueScores[score.name].score) {
-          uniqueScores[score.name] = score;
-        }
-      });
-
-      const topScores = Object.values(uniqueScores)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5);
-
-      setLeaderboardData(topScores);
-      setShowLeaderboard(true); // Show the leaderboard modal
+      await fetchAndShowLeaderboard();
 
     } catch (error) {
       console.error("Error al guardar o leer la puntuación: ", error);
@@ -255,7 +297,14 @@ function App() {
       <div className="App-header">
         <div className="simon-wrapper">{SimonButtons}</div>
         <div className="game-controls">
-          <button className="start-button" onClick={handleStart}>
+          <button
+            className="start-button"
+            onMouseDown={handleMouseDownOnStart}
+            onMouseUp={handleMouseUpOnStart}
+            onMouseLeave={handleMouseLeaveOnStart}
+            onTouchStart={handleMouseDownOnStart}
+            onTouchEnd={handleMouseUpOnStart}
+          >
             <div className="score">
               <div className="lcd-line">
                 <span className="lcd-label lcd-text">
